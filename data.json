@@ -1,0 +1,15 @@
+{
+  "stops": [1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010],
+  "lines": [
+    { "linea": "014", "trayecto": 1, "sentido": 1 },
+    { "linea": "015", "trayecto": 1, "sentido": 1 },
+    { "linea": "050", "trayecto": 1, "sentido": 2 },
+    { "linea": "110", "trayecto": 1, "sentido": 1 }
+  ],
+  "metroStops": [1, 2, 3, 4, 5, 6],
+  "metroRoutes": [
+    { "route": 1, "direction": 0 },
+    { "route": 1, "direction": 1 }
+  ],
+  "notifications": [1, 2, 3]
+}
