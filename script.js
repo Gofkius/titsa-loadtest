@@ -4,6 +4,8 @@ import { SharedArray } from 'k6/data';
 
 const BASE = __ENV.TARGET;                      // e.g. http://your-api.railway.internal:8080
 const SCALE = parseFloat(__ENV.SCALE || '1');   // multiply all rates (0.1 for a smoke test)
+// k6 needs integer rates, so rates are expressed per minute and rounded
+const R = (perSec) => Math.max(1, Math.round(perSec * 60 * SCALE));
 
 // data.json: { stops: [..], lines: [{linea, trayecto, sentido}], metroStops: [..], metroRoutes: [{route, direction}], notifications: [..] }
 const data = new SharedArray('data', () => [JSON.parse(open('./data.json'))])[0];
@@ -26,35 +28,35 @@ export const options = {
     // Main behaviour: open app -> nearby stops -> watch arrivals at one stop, refreshing
     bus_arrivals: {
       executor: 'ramping-arrival-rate', exec: 'busArrivals',
-      startRate: 1, timeUnit: '1s', preAllocatedVUs: 500, maxVUs: 4000,
+      startRate: R(1), timeUnit: '1m', preAllocatedVUs: 500, maxVUs: 4000,
       stages: [
-        { target: 5 * SCALE, duration: '2m' },
-        { target: 15 * SCALE, duration: '5m' },
-        { target: 30 * SCALE, duration: '5m' },
+        { target: R(5), duration: '2m' },
+        { target: R(15), duration: '5m' },
+        { target: R(30), duration: '5m' },
         { target: 0, duration: '1m' },
       ],
     },
     // Metro/tram riders: shorter sessions, arrivals polling
     metro: {
       executor: 'ramping-arrival-rate', exec: 'metroSession',
-      startRate: 1, timeUnit: '1s', preAllocatedVUs: 200, maxVUs: 1500,
+      startRate: R(0.5), timeUnit: '1m', preAllocatedVUs: 200, maxVUs: 1500,
       stages: [
-        { target: 2 * SCALE, duration: '2m' },
-        { target: 6 * SCALE, duration: '5m' },
-        { target: 10 * SCALE, duration: '5m' },
+        { target: R(2), duration: '2m' },
+        { target: R(6), duration: '5m' },
+        { target: R(10), duration: '5m' },
         { target: 0, duration: '1m' },
       ],
     },
     // Planners: browse lines, stops of a line, itinerary (heavier, less frequent)
     line_browsing: {
       executor: 'constant-arrival-rate', exec: 'lineBrowsing',
-      rate: 3 * SCALE, timeUnit: '1s', duration: '13m',
+      rate: R(3), timeUnit: '1m', duration: '13m',
       preAllocatedVUs: 100, maxVUs: 800,
     },
     // Cold app opens: just the cacheable list endpoint
     app_open: {
       executor: 'constant-arrival-rate', exec: 'appOpen',
-      rate: 2 * SCALE, timeUnit: '1s', duration: '13m',
+      rate: R(2), timeUnit: '1m', duration: '13m',
       preAllocatedVUs: 50, maxVUs: 300,
     },
   },
