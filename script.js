@@ -22,6 +22,10 @@ const hot = (arr) => arr[Math.floor(Math.pow(Math.random(), 2.5) * arr.length)];
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
 const get = (path, name) => http.get(`${BASE}${path}`, { tags: { endpoint: name } });
 const ok = (r, name) => check(r, { [`${name} 200`]: (x) => x.status === 200 });
+// The API can answer 200 with {"success":false}; that is a data failure, not a pass
+const okData = (r, name) => check(r, {
+  [`${name} success:true`]: (x) => { try { return x.json('success') === true; } catch (e) { return false; } },
+});
 
 export const options = {
   scenarios: {
@@ -69,12 +73,17 @@ export function busArrivals() {
   think(2, 6);
 
   const stop = hot(data.stops);
-  if (Math.random() < 0.3) { ok(get(`/titsa/parada/${stop}`, 'titsa_parada'), 'parada'); think(1, 3); }
+  if (Math.random() < 0.3) {
+    const p = get(`/titsa/parada/${stop}`, 'titsa_parada');
+    ok(p, 'parada'); okData(p, 'parada');
+    think(1, 3);
+  }
 
   // User stares at the arrivals screen, which auto-refreshes
   const refreshes = 2 + Math.floor(Math.random() * 5);
   for (let i = 0; i < refreshes; i++) {
-    ok(get(`/titsa/llegadas/${stop}`, 'titsa_llegadas'), 'llegadas');
+    const l = get(`/titsa/llegadas/${stop}`, 'titsa_llegadas');
+    ok(l, 'llegadas'); okData(l, 'llegadas');
     think(15, 30);
   }
 
@@ -100,7 +109,8 @@ export function lineBrowsing() {
   const l = hot(data.lines);
   ok(get(`/titsa/paradas?linea=${l.linea}&sentido=${l.sentido}`, 'titsa_paradas_linea'), 'paradas');
   think(2, 6);
-  ok(get(`/titsa/itinerario?linea=${l.linea}&trayecto=${l.trayecto}`, 'titsa_itinerario'), 'itinerario');
+  const it = get(`/titsa/itinerario?linea=${l.linea}&trayecto=${l.trayecto}`, 'titsa_itinerario');
+  ok(it, 'itinerario'); okData(it, 'itinerario');
   think(1, 3);
 }
 
