@@ -36,17 +36,6 @@ export const options = {
         { target: 0, duration: '1m' },
       ],
     },
-    // Metro/tram riders: shorter sessions, arrivals polling
-    metro: {
-      executor: 'ramping-arrival-rate', exec: 'metroSession',
-      startRate: R(0.5), timeUnit: '1m', preAllocatedVUs: 200, maxVUs: 1500,
-      stages: [
-        { target: R(2), duration: '2m' },
-        { target: R(6), duration: '5m' },
-        { target: R(10), duration: '5m' },
-        { target: 0, duration: '1m' },
-      ],
-    },
     // Planners: browse lines, stops of a line, itinerary (heavier, less frequent)
     line_browsing: {
       executor: 'constant-arrival-rate', exec: 'lineBrowsing',
@@ -68,8 +57,6 @@ export const options = {
     'http_req_duration{endpoint:titsa_lineas}': ['p(95)<500'],
     'http_req_duration{endpoint:titsa_paradas_linea}': ['p(95)<600'],
     'http_req_duration{endpoint:titsa_itinerario}': ['p(95)<800'],
-    'http_req_duration{endpoint:metro_llegadas}': ['p(95)<800'],
-    'http_req_duration{endpoint:metro_itinerario}': ['p(95)<800'],
     dropped_iterations: ['count<100'],
   },
 };
