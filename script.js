@@ -68,7 +68,7 @@ export const options = {
 export function busArrivals() {
   const [lat, lng] = pick(HOTSPOTS);
   const radio = pick([200, 300, 500]);
-  const cercanas = get(`/titsa/cercanas?lat=${(lat + rnd(-0.01, 0.01)).toFixed(5)}&lng=${(lng + rnd(-0.01, 0.01)).toFixed(5)}&radio=${radio}`, 'titsa_cercanas');
+  const cercanas = get(`/titsa/cercanas?lat=${(lat + rnd(-0.003, 0.003)).toFixed(5)}&lng=${(lng + rnd(-0.003, 0.003)).toFixed(5)}&radio=${radio}`, 'titsa_cercanas');
   ok(cercanas, 'cercanas');
   think(2, 6);
 
